@@ -5,13 +5,13 @@ require 'optparse'
 require 'lunchy'
 
 CONFIG = {}
-OPERATIONS = %w(start stop restart ls list status install uninstall rm show edit)
+OPERATIONS = %w(load unload reload ls list status install uninstall rm show edit)
 
 option_parser = OptionParser.new do |opts|
   opts.banner = "Lunchy #{Lunchy::VERSION}, the friendly launchctl wrapper\n" \
     "Usage: #{File.basename(__FILE__)} [#{OPERATIONS.join('|')}] [options]"
 
-  opts.on("-F", "--force", "Force start (disabled) agents") do |verbose|
+  opts.on("-F", "--force", "Force load (disabled) agents") do |verbose|
     CONFIG[:force] = true
   end
 
@@ -30,7 +30,7 @@ option_parser = OptionParser.new do |opts|
   opts.on("-s", "--symlink", "Use a symlink for installation") do |verbose|
     CONFIG[:symlink] = true
   end
-  opts.on("-a", "--all", "stop all running services/daemons") do |verbose|
+  opts.on("-a", "--all", "unload all running services/daemons") do |verbose|
     CONFIG[:all] = true
   end
 
@@ -40,23 +40,23 @@ Supported commands:
 
  ls [-l] [pattern]       Show the list of installed agents, with optional [pattern] filter
  list [-l] [pattern]     Alias for 'ls'
- start [-wF] [pattern]   Start the first agent matching [pattern]
- stop [-w] [pattern]     Stop the first agent matching [pattern]
- restart [pattern]       Stop and start the first agent matching [pattern]
+ load [-wF] [pattern]    Load the first agent matching [pattern]
+ unload [-w] [pattern]   Unload the first agent matching [pattern]
+ reload [pattern]       Unload and Load the first agent matching [pattern]
  status [pattern]        Show the PID and label for all agents, with optional [pattern] filter
  install [-s] [file]     Install [file] to ~/Library/LaunchAgents or /Library/LaunchAgents (whichever it finds first)
  uninstall [name]        Uninstall [name] from ~/Library/LaunchAgents or /Library/LaunchAgents (whichever it finds first)
  show [pattern]          Show the contents of the launchctl daemon file
  edit [pattern]          Open the launchctl daemon file in the default editor (EDITOR environment variable)
 
--w will persist the start/stop command so the agent will load on startup or never load, respectively.
+-w will persist the load/unload command so the agent will load on startup or never load, respectively.
 -l will display absolute paths of the launchctl daemon files when showing list of installed agents.
 
 Example:
  lunchy ls
  lunchy ls -l nginx
- lunchy start -w redis
- lunchy stop mongo
+ lunchy load -w redis
+ lunchy unload mongo
  lunchy status mysql
  lunchy install /usr/local/Cellar/redis/2.2.2/io.redis.redis-server.plist
  lunchy show redis

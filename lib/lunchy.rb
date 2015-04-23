@@ -3,43 +3,43 @@ require 'fileutils'
 class Lunchy
   VERSION = '0.8.0'
 
-  def start(params)
-    raise ArgumentError, "start [-wF] [name]" if params.empty?
+  def load(params)
+    raise ArgumentError, "load [-wF] [name]" if params.empty?
 
     with_match params[0] do |name, path|
       execute("launchctl load #{force}#{write}#{path.inspect}")
-      puts "started #{name}"
+      puts "loaded #{name}"
     end
   end
 
-  def stop(params)
+  def unload(params)
     if all
-      return stop_all(params)
+      return unload_all(params)
     end
-    raise ArgumentError, "stop [-w] [name]" if params.empty?
+    raise ArgumentError, "unload [-w] [name]" if params.empty?
 
     with_match params[0] do |name, path|
       execute("launchctl unload #{write}#{path.inspect}")
-      puts "stopped #{name}"
+      puts "unloaded #{name}"
     end
   end
 
-  def stop_all(params)
+  def unload_all(params)
     daemons = status(params).split("\n").map! {|l| l.split(" ")[-1]}
     if daemons.size > 0
       daemons.each{ |daemon|  with_match daemon do |name, path|
         execute("launchctl unload #{write}#{path.inspect}")
-        puts "stopped #{name}"
+        puts "unloaded #{name}"
       end
       }
     else
-      puts "no agents found to be stopped"
+      puts "no agents found to be unloaded"
     end
   end
 
-  def restart(params)
-    stop(params.dup)
-    start(params.dup)
+  def reload(params)
+    unload(params.dup)
+    load(params.dup)
   end
 
   def status(params)
@@ -86,7 +86,7 @@ class Lunchy
   def uninstall(params)
     raise ArgumentError, "uninstall [name]" if params.empty?
 
-    stop(params.dup)
+    unload(params.dup)
 
     with_match params[0] do |name, path|
       if File.exist?(path)
