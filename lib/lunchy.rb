@@ -13,11 +13,27 @@ class Lunchy
   end
 
   def stop(params)
+    if all
+      return stop_all(params)
+    end
     raise ArgumentError, "stop [-w] [name]" if params.empty?
 
     with_match params[0] do |name, path|
       execute("launchctl unload #{write}#{path.inspect}")
       puts "stopped #{name}"
+    end
+  end
+
+  def stop_all(params)
+    daemons = status(params).split("\n").map! {|l| l.split(" ")[-1]}
+    if daemons.size > 0
+      daemons.each{ |daemon|  with_match daemon do |name, path|
+        execute("launchctl unload #{write}#{path.inspect}")
+        puts "stopped #{name}"
+      end
+      }
+    else
+      puts "no agents found to be stopped"
     end
   end
 
@@ -120,6 +136,10 @@ class Lunchy
     CONFIG[:symlink]
   end
 
+  def all
+    CONFIG[:all]
+  end
+
   def with_match(name)
     files = plists.select {|k,_| k =~ /#{name}/i }
     files = Hash[files] if files.is_a?(Array) # ruby 1.8
@@ -137,13 +157,14 @@ class Lunchy
     puts "Executing: #{cmd}" if verbose?
     emitted = `#{cmd}`
     puts emitted unless emitted.empty?
+    emitted
   end
 
   def plists
     @plists ||= begin
       plists = {}
-      dirs.each do |dir|
-        Dir["#{File.expand_path(dir)}/*.plist"].inject(plists) do |memo, filename|
+      plist_locations.each do |plist_location|
+        Dir["#{File.expand_path(plist_location)}/*.plist"].inject(plists) do |memo, filename|
           memo[File.basename(filename, ".plist")] = filename; memo
         end
       end
@@ -151,14 +172,10 @@ class Lunchy
     end
   end
 
-  def dirs
+  def plist_locations
     result = %w(/Library/LaunchAgents ~/Library/LaunchAgents)
-    result.push('/Library/LaunchDaemons', '/System/Library/LaunchDaemons') if root?
+    result.push('/Library/LaunchDaemons', '/System/Library/LaunchDaemons', '/System/Library/LaunchAgents') if Process.euid == 0
     result
-  end
-
-  def root?
-    Process.euid == 0
   end
 
   def verbose?

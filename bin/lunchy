@@ -30,6 +30,9 @@ option_parser = OptionParser.new do |opts|
   opts.on("-s", "--symlink", "Use a symlink for installation") do |verbose|
     CONFIG[:symlink] = true
   end
+  opts.on("-a", "--all", "stop all running services/daemons") do |verbose|
+    CONFIG[:all] = true
+  end
 
   opts.separator <<-EOS
 
@@ -60,7 +63,7 @@ Example:
  lunchy edit mongo
 
 Note: if you run lunchy as root, you can manage daemons in /Library/LaunchDaemons also.
-EOS
+  EOS
 end
 option_parser.parse!
 
