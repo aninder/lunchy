@@ -135,7 +135,7 @@ class Lunchy
     IO.popen("
       IFS=$'\n';
       find #{(LAUNCHD_USER_LOCATIONS+LAUNCHD_SYSTEM_LOCATIONS).join(" ")} -type f -exec \\
-      grep --exclude-dir={.bzr,.cvs,.git,.hg,.svn} -inHE \'#{params.join("|")}\' {} \\;") {|f|
+      grep --exclude-dir={.bzr,.cvs,.git,.hg,.svn} -IinHE \'#{params.join("|")}\' {} \\;") {|f|
             puts f.readlines.map {|str| str.gsub(/#{params.join("|")}/i,&:red)}
          }
   end
