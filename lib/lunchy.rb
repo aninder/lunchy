@@ -140,6 +140,10 @@ class Lunchy
          }
   end
 
+  def locations(params)
+    puts (LAUNCHD_SYSTEM_LOCATIONS+LAUNCHD_USER_LOCATIONS).join("\n")
+  end
+
   private
 
   def force
