@@ -200,7 +200,7 @@ class Lunchy
 
   def plist_locations
     result = LAUNCHD_USER_LOCATIONS
-    result.push LAUNCHD_USER_LOCATIONS if Process.euid == 0
+    result.push LAUNCHD_SYSTEM_LOCATIONS if Process.euid == 0
     result
   end
 
