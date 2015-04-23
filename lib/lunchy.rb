@@ -1,8 +1,21 @@
 require 'fileutils'
 
+class String
+  def red
+    "\033[31m#{self}\033[0m"
+  end
+end
+
 class Lunchy
   VERSION = '0.8.0'
 
+  LAUNCHD_USER_LOCATIONS =  %w(/Library/LaunchAgents
+                              ~/Library/LaunchAgents
+                              );
+  LAUNCHD_SYSTEM_LOCATIONS = %w(/Library/LaunchDaemons
+                                /System/Library/LaunchDaemons
+                                /System/Library/LaunchAgents
+                               )
   def load(params)
     raise ArgumentError, "load [-wF] [name]" if params.empty?
 
@@ -118,6 +131,15 @@ class Lunchy
     end
   end
 
+  def search(params)
+    IO.popen("
+      IFS=$'\n';
+      find #{(LAUNCHD_USER_LOCATIONS+LAUNCHD_SYSTEM_LOCATIONS).join(" ")} -type f -exec \\
+      grep --exclude-dir={.bzr,.cvs,.git,.hg,.svn} -inHE \'#{params.join("|")}\' {} \\;") {|f|
+            puts f.readlines.map {|str| str.gsub(/#{params.join("|")}/,&:red)}
+         }
+  end
+
   private
 
   def force
@@ -173,8 +195,8 @@ class Lunchy
   end
 
   def plist_locations
-    result = %w(/Library/LaunchAgents ~/Library/LaunchAgents)
-    result.push('/Library/LaunchDaemons', '/System/Library/LaunchDaemons', '/System/Library/LaunchAgents') if Process.euid == 0
+    result = LAUNCHD_USER_LOCATIONS
+    result.push LAUNCHD_USER_LOCATIONS if Process.euid == 0
     result
   end
 

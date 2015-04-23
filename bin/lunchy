@@ -5,7 +5,7 @@ require 'optparse'
 require 'lunchy'
 
 CONFIG = {}
-OPERATIONS = %w(load unload reload ls list status install uninstall rm show edit)
+OPERATIONS = %w(load unload reload ls list status install uninstall rm show edit search location)
 
 option_parser = OptionParser.new do |opts|
   opts.banner = "Lunchy #{Lunchy::VERSION}, the friendly launchctl wrapper\n" \
@@ -48,6 +48,7 @@ Supported commands:
  uninstall [name]        Uninstall [name] from ~/Library/LaunchAgents or /Library/LaunchAgents (whichever it finds first)
  show [pattern]          Show the contents of the launchctl daemon file
  edit [pattern]          Open the launchctl daemon file in the default editor (EDITOR environment variable)
+ search [pattern]        Search for pattern in files in all 5 launchd locations
 
 -w will persist the load/unload command so the agent will load on startup or never load, respectively.
 -l will display absolute paths of the launchctl daemon files when showing list of installed agents.
@@ -61,6 +62,7 @@ Example:
  lunchy install /usr/local/Cellar/redis/2.2.2/io.redis.redis-server.plist
  lunchy show redis
  lunchy edit mongo
+ lunchy search apple
 
 Note: if you run lunchy as root, you can manage daemons in /Library/LaunchDaemons also.
   EOS
