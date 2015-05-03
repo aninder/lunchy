@@ -5,7 +5,7 @@ require 'optparse'
 require 'lunchy'
 
 CONFIG = {}
-OPERATIONS = %w(load unload reload ls list status install uninstall rm show edit search locations)
+OPERATIONS = %w(load unload reload ls list status install uninstall rm show edit search locations disabled)
 
 option_parser = OptionParser.new do |opts|
   opts.banner = "Lunchy #{Lunchy::VERSION}, the friendly launchctl wrapper\n" \
@@ -50,6 +50,7 @@ Supported commands:
  edit [pattern]          Open the launchctl daemon file in the default editor (EDITOR environment variable)
  search [pattern]        Search for pattern in files in all 5 launchd locations
  locations               print launchd locations
+ disabled                print disabled daemons with -w command
 
 -w will persist the load/unload command so the agent will load on startup or never load, respectively.
 -l will display absolute paths of the launchctl daemon files when showing list of installed agents.
@@ -64,12 +65,11 @@ Example:
  lunchy show redis
  lunchy edit mongo
  lunchy search apple
-
+ lunchy disabled
 Note: if you run lunchy as root, you can manage daemons in /Library/LaunchDaemons also.
   EOS
 end
 option_parser.parse!
-
 
 op = ARGV.shift
 if OPERATIONS.include?(op)

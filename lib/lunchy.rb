@@ -1,4 +1,5 @@
 require 'fileutils'
+require 'nokogiri'
 
 class String
   def red
@@ -142,6 +143,12 @@ class Lunchy
 
   def locations(params)
     puts (LAUNCHD_SYSTEM_LOCATIONS+LAUNCHD_USER_LOCATIONS).join("\n")
+  end
+
+  # disabled daemons list
+  def disabled(params)
+    doc=Nokogiri::XML File.open "/var/db/launchd.db/com.apple.launchd.peruser.#{Process.uid}/overrides.plist"
+    puts doc.xpath("//key[following-sibling::dict[position()=1]/true]").map &:text
   end
 
   private
